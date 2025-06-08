@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,7 +20,7 @@ serve(async (req) => {
 
   console.log("generate-pluggy-connect-token function invoked.");
   console.log("Attempting to use PLUGGY_CLIENT_ID:", PLUGGY_CLIENT_ID ? `${PLUGGY_CLIENT_ID.substring(0, 5)}...` : "Not Set");
-  // DO NOT LOG PLUGGY_CLIENT_SECRET
+  // DO NOT LOG PLUGGY_CLIENT_SECRET for security reasons.
 
   try {
     // Ensure Pluggy credentials are set
@@ -56,36 +55,60 @@ serve(async (req) => {
     if (!authResponse.ok) {
       const errorText = await authResponse.text();
       console.error("Pluggy Auth Error Details:", errorText);
-      throw new Error(`Failed to get Pluggy API Key: ${authResponse.statusText} - ${errorText}`);
+      // Try to parse the errorText if it's JSON
+      let parsedError;
+      try {
+        parsedError = JSON.parse(errorText);
+      } catch (e) {
+        parsedError = errorText;
+      }
+      throw new Error(`Failed to get Pluggy API Key: ${authResponse.statusText} - ${JSON.stringify(parsedError)}`);
     }
     const { apiKey } = await authResponse.json();
+    if (!apiKey) {
+        console.error("Pluggy API Key was not returned from auth endpoint.");
+        throw new Error("Pluggy API Key was not returned from auth endpoint.");
+    }
     console.log("Pluggy API Key obtained successfully.");
 
     // 2. Generate Connect Token
-    console.log("Requesting Pluggy Connect Token...");
+    console.log("Requesting Pluggy Connect Token with apiKey:", apiKey ? `${apiKey.substring(0,10)}...` : "API Key is null/undefined");
+    const connectTokenPayload = {
+      clientUserId: userId,
+      options: {
+        webhookUrl: PLUGGY_WEBHOOK_URL,
+        avoidDuplicates: true,
+        products: ["transactions", "accounts"],
+      },
+    };
+    console.log("Connect Token Payload:", JSON.stringify(connectTokenPayload));
+
     const connectTokenResponse = await fetch('https://api.pluggy.ai/connect_token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        'X-API-KEY': apiKey, // Using X-API-KEY header as per Pluggy docs for some endpoints
       },
-      body: JSON.stringify({
-        clientUserId: userId,
-        options: {
-          webhookUrl: PLUGGY_WEBHOOK_URL,
-          avoidDuplicates: true,
-          products: ["transactions", "accounts"],
-        },
-      }),
+      body: JSON.stringify(connectTokenPayload),
     });
 
     console.log("Pluggy Connect Token API response status:", connectTokenResponse.status);
     if (!connectTokenResponse.ok) {
       const errorText = await connectTokenResponse.text();
       console.error("Pluggy Connect Token Error Details:", errorText);
-      throw new Error(`Failed to generate Pluggy Connect Token: ${connectTokenResponse.statusText} - ${errorText}`);
+      let parsedError;
+      try {
+        parsedError = JSON.parse(errorText);
+      } catch (e) {
+        parsedError = errorText;
+      }
+      throw new Error(`Failed to generate Pluggy Connect Token: ${connectTokenResponse.statusText} - ${JSON.stringify(parsedError)}`);
     }
     const { connectToken } = await connectTokenResponse.json();
+    if (!connectToken) {
+        console.error("Pluggy Connect Token was not returned.");
+        throw new Error("Pluggy Connect Token was not returned.");
+    }
     console.log("Pluggy Connect Token generated successfully.");
 
     return new Response(JSON.stringify({ connectToken }), {
