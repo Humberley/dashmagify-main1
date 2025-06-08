@@ -19,8 +19,9 @@ serve(async (req) => {
   }
 
   console.log("generate-pluggy-connect-token function invoked.");
-  console.log("Attempting to use PLUGGY_CLIENT_ID:", PLUGGY_CLIENT_ID ? `${PLUGGY_CLIENT_ID.substring(0, 5)}...` : "Not Set");
-  // DO NOT LOG PLUGGY_CLIENT_SECRET for security reasons.
+  // Adicionando logs para verificar as variáveis de ambiente
+  console.log("PLUGGY_CLIENT_ID (inside function):", PLUGGY_CLIENT_ID ? `${PLUGGY_CLIENT_ID.substring(0, 5)}...` : "NOT LOADED");
+  console.log("PLUGGY_CLIENT_SECRET (inside function, masked):", PLUGGY_CLIENT_SECRET ? `${PLUGGY_CLIENT_SECRET.substring(0, 5)}...` : "NOT LOADED");
 
   try {
     // Ensure Pluggy credentials are set
