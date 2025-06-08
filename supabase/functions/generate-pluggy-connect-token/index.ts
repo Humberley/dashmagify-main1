@@ -87,7 +87,7 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-KEY': apiKey, // Using X-API-KEY header as per Pluggy docs for some endpoints
+        'Authorization': `Bearer ${apiKey}`, // <-- CORRIGIDO AQUI!
       },
       body: JSON.stringify(connectTokenPayload),
     });
