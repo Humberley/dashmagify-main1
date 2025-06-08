@@ -15,7 +15,7 @@ const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""; 
 const PLUGGY_CLIENT_ID = Deno.env.get("PLUGGY_CLIENT_ID");
 const PLUGGY_CLIENT_SECRET = Deno.env.get("PLUGGY_CLIENT_SECRET");
 
-// IMPORTANT: Replace with your actual webhook URL
+// Use the correct Supabase Function URL for the Pluggy webhook
 const PLUGGY_WEBHOOK_URL = "https://kgmtbffyvygfjkwadkrc.supabase.co/functions/v1/pluggy-webhook"; 
 
 serve(async (req) => {
