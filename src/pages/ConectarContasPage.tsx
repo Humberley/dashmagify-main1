@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Connect } from "@pluggy/connect-react"; // Corrected import for React web
+import PluggyConnect from "@pluggy/pluggy-connect-sdk"; // Corrected import and component name
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getUserFromLocalStorage } from "@/lib/financeUtils";
@@ -33,12 +33,15 @@ const ConectarContasPage = () => {
       setIsLoading(true);
       setError(null);
       try {
+        // Ensure you have the correct Supabase session token if your Edge Function requires auth
+        const session = await supabase.auth.getSession();
+        const accessToken = session.data.session?.access_token;
+
         const response = await fetch(`https://kgmtbffyvygfjkwadkrc.supabase.co/functions/v1/generate-pluggy-connect-token`, {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
-            // Pass the Authorization header for Supabase Edge Functions if RLS is enabled
-            "Authorization": `Bearer ${supabase.auth.session()?.access_token || ''}`
+            "Authorization": `Bearer ${accessToken || ''}` // Pass Supabase access token
           },
           body: JSON.stringify({ userId })
         });
@@ -139,8 +142,8 @@ const ConectarContasPage = () => {
             )}
 
             {!isLoading && !error && connectToken && (
-              <div className="w-full h-[500px] border rounded-lg overflow-hidden">
-                <Connect
+              <div className="w-full h-[600px] border rounded-lg overflow-hidden"> {/* Increased height */}
+                <PluggyConnect
                   connectToken={connectToken}
                   includeSandbox={true}
                   language="pt"
@@ -155,6 +158,10 @@ const ConectarContasPage = () => {
                       title: "Erro na integração",
                       description: err.message || "Ocorreu um erro ao conectar sua conta.",
                     });
+                  }}
+                  updateItem={async (itemId) => {
+                     console.log('Pluggy Connect updateItem event for itemId:', itemId);
+                     // You might want to re-fetch or update the item's status in your backend
                   }}
                 />
               </div>
