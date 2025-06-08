@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import PluggyConnect from "@pluggy/pluggy-connect-sdk"; // Corrected import and component name
+import PluggyConnect from "pluggy-connect"; // Attempting default import from the installed package
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getUserFromLocalStorage } from "@/lib/financeUtils";
@@ -151,7 +151,7 @@ const ConectarContasPage = () => {
                     console.log("Pluggy Connect Success:", item);
                     savePluggyItemId(item.id);
                   }}
-                  onError={err => {
+                  onError={(err: Error) => { // Explicitly type err
                     console.error("Erro na integração Pluggy:", err);
                     toast({
                       variant: "destructive",
@@ -159,7 +159,7 @@ const ConectarContasPage = () => {
                       description: err.message || "Ocorreu um erro ao conectar sua conta.",
                     });
                   }}
-                  updateItem={async (itemId) => {
+                  updateItem={async (itemId: string) => { // Explicitly type itemId
                      console.log('Pluggy Connect updateItem event for itemId:', itemId);
                      // You might want to re-fetch or update the item's status in your backend
                   }}
