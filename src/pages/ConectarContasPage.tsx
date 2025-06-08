@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Connect } from "pluggy-connect"; // Corrected import
+import { Connect } from "@pluggy/connect-react"; // Corrected import for React web
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getUserFromLocalStorage } from "@/lib/financeUtils";
