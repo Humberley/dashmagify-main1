@@ -6,11 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Initialize Supabase client for database access (if needed, though not directly for this function)
-const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
-const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""; // Use service role key for admin operations if needed
-
 // Pluggy API credentials from Supabase secrets
 const PLUGGY_CLIENT_ID = Deno.env.get("PLUGGY_CLIENT_ID");
 const PLUGGY_CLIENT_SECRET = Deno.env.get("PLUGGY_CLIENT_SECRET");
@@ -24,15 +19,22 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log("generate-pluggy-connect-token function invoked.");
+  console.log("Attempting to use PLUGGY_CLIENT_ID:", PLUGGY_CLIENT_ID ? `${PLUGGY_CLIENT_ID.substring(0, 5)}...` : "Not Set");
+  // DO NOT LOG PLUGGY_CLIENT_SECRET
+
   try {
     // Ensure Pluggy credentials are set
     if (!PLUGGY_CLIENT_ID || !PLUGGY_CLIENT_SECRET) {
+      console.error("Pluggy CLIENT_ID or CLIENT_SECRET is not set in Supabase secrets.");
       throw new Error("Pluggy CLIENT_ID or CLIENT_SECRET not set in Supabase secrets.");
     }
 
-    const { userId } = await req.json(); // Expect userId in the request body
+    const { userId } = await req.json(); 
+    console.log("Received userId:", userId);
 
     if (!userId) {
+      console.error("userId is required in the request body.");
       return new Response(JSON.stringify({ error: "userId is required" }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -40,6 +42,7 @@ serve(async (req) => {
     }
 
     // 1. Get Pluggy API Key
+    console.log("Requesting Pluggy API Key...");
     const authResponse = await fetch('https://api.pluggy.ai/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -49,14 +52,17 @@ serve(async (req) => {
       }),
     });
 
+    console.log("Pluggy Auth API response status:", authResponse.status);
     if (!authResponse.ok) {
       const errorText = await authResponse.text();
-      console.error("Pluggy Auth Error:", authResponse.status, errorText);
-      throw new Error(`Failed to get Pluggy API Key: ${authResponse.statusText}`);
+      console.error("Pluggy Auth Error Details:", errorText);
+      throw new Error(`Failed to get Pluggy API Key: ${authResponse.statusText} - ${errorText}`);
     }
     const { apiKey } = await authResponse.json();
+    console.log("Pluggy API Key obtained successfully.");
 
     // 2. Generate Connect Token
+    console.log("Requesting Pluggy Connect Token...");
     const connectTokenResponse = await fetch('https://api.pluggy.ai/connect_token', {
       method: 'POST',
       headers: {
@@ -73,12 +79,14 @@ serve(async (req) => {
       }),
     });
 
+    console.log("Pluggy Connect Token API response status:", connectTokenResponse.status);
     if (!connectTokenResponse.ok) {
       const errorText = await connectTokenResponse.text();
-      console.error("Pluggy Connect Token Error:", connectTokenResponse.status, errorText);
-      throw new Error(`Failed to generate Pluggy Connect Token: ${connectTokenResponse.statusText}`);
+      console.error("Pluggy Connect Token Error Details:", errorText);
+      throw new Error(`Failed to generate Pluggy Connect Token: ${connectTokenResponse.statusText} - ${errorText}`);
     }
     const { connectToken } = await connectTokenResponse.json();
+    console.log("Pluggy Connect Token generated successfully.");
 
     return new Response(JSON.stringify({ connectToken }), {
       status: 200,
@@ -86,7 +94,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error("Edge Function Error:", error.message);
+    console.error("Edge Function Catch Block Error:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
