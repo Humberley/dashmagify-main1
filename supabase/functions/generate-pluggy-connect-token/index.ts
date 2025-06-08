@@ -82,12 +82,13 @@ serve(async (req) => {
       },
     };
     console.log("Connect Token Payload:", JSON.stringify(connectTokenPayload));
+    console.log("Usando Authorization:", `Bearer ${apiKey}`); // <-- Log para verificação
 
     const connectTokenResponse = await fetch('https://api.pluggy.ai/connect_token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`, // <-- CORRIGIDO AQUI!
+        'Authorization': `Bearer ${apiKey}`,   // <-- CORRETO!
       },
       body: JSON.stringify(connectTokenPayload),
     });
