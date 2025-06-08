@@ -16,7 +16,7 @@ const PLUGGY_CLIENT_ID = Deno.env.get("PLUGGY_CLIENT_ID");
 const PLUGGY_CLIENT_SECRET = Deno.env.get("PLUGGY_CLIENT_SECRET");
 
 // IMPORTANT: Replace with your actual webhook URL
-const PLUGGY_WEBHOOK_URL = "https://seuapp.com/webhook"; 
+const PLUGGY_WEBHOOK_URL = "https://kgmtbffyvygfjkwadkrc.supabase.co/functions/v1/pluggy-webhook"; 
 
 serve(async (req) => {
   // Handle CORS preflight requests
