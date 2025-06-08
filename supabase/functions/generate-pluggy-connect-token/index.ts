@@ -66,14 +66,18 @@ serve(async (req) => {
       throw new Error(`Failed to get Pluggy API Key: ${authResponse.statusText} - ${JSON.stringify(parsedError)}`);
     }
     const { apiKey } = await authResponse.json();
-    if (!apiKey) {
-        console.error("Pluggy API Key was not returned from auth endpoint.");
-        throw new Error("Pluggy API Key was not returned from auth endpoint.");
+    if (!apiKey || typeof apiKey !== 'string') { // Added type check
+        console.error("Pluggy API Key was not returned from auth endpoint or is not a string.");
+        throw new Error("Pluggy API Key was not returned from auth endpoint or is not a string.");
     }
-    console.log("Pluggy API Key obtained successfully.");
+    const cleanedApiKey = apiKey.trim(); // Add trim just in case
+    console.log("Pluggy API Key obtained successfully. Full key (first 100 chars):", cleanedApiKey.substring(0, 100)); // Increased log length
 
     // 2. Generate Connect Token
-    console.log("Requesting Pluggy Connect Token with apiKey:", apiKey ? `${apiKey.substring(0,10)}...` : "API Key is null/undefined");
+    console.log("Requesting Pluggy Connect Token...");
+    const authorizationHeaderValue = `Bearer ${cleanedApiKey}`; // Store the full header value
+    console.log("Sending Authorization header (first 100 chars):", authorizationHeaderValue.substring(0, 100) + '...'); // Increased log length
+
     const connectTokenPayload = {
       clientUserId: userId,
       options: {
@@ -83,13 +87,12 @@ serve(async (req) => {
       },
     };
     console.log("Connect Token Payload:", JSON.stringify(connectTokenPayload));
-    console.log("Usando Authorization:", `Bearer ${apiKey}`); // <-- Log para verificação
 
     const connectTokenResponse = await fetch('https://api.pluggy.ai/connect_token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,   // <-- CORRETO!
+        'Authorization': authorizationHeaderValue, // Use the stored value
       },
       body: JSON.stringify(connectTokenPayload),
     });
