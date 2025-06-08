@@ -15,6 +15,7 @@ import DividasParcelasPage from "./pages/DividasParcelasPage";
 import ApontamentosPage from "./pages/ApontamentosPage";
 import PrevisaoInvestimentoPage from "./pages/PrevisaoInvestimentoPage";
 import PrevisaoDividaPage from "./pages/PrevisaoDividaPage";
+import ConectarContasPage from "./pages/ConectarContasPage"; // Import new page
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import ResetPassword from "./pages/ResetPassword";
@@ -134,6 +135,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <PrevisaoDividaPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/conectar-contas"  // New route
+            element={
+              <ProtectedRoute>
+                <ConectarContasPage />
               </ProtectedRoute>
             } 
           />

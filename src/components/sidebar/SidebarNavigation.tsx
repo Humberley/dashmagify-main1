@@ -1,4 +1,3 @@
-
 import { useLocation } from "react-router-dom";
 import {
   BarChart3,
@@ -10,7 +9,8 @@ import {
   LineChart,
   Wallet,
   TrendingUp,
-  Percent
+  Percent,
+  Link2, // Icon for Conectar Contas
 } from "lucide-react";
 import { SidebarNavItem } from "./SidebarNavItem";
 import { SidebarNavItemCollapsed } from "./SidebarNavItemCollapsed";
@@ -32,6 +32,7 @@ export const SidebarNavigation = ({ isOpen, closeSidebar }: SidebarNavigationPro
     { icon: CalendarClock, label: "Apontamentos", href: "/apontamentos" },
     { icon: TrendingUp, label: "Previsão Investimento", href: "/previsao-investimento" },
     { icon: Percent, label: "Previsão Dívida", href: "/previsao-divida" },
+    { icon: Link2, label: "Conectar contas", href: "/conectar-contas" }, // New item
   ];
 
   return (
